@@ -61,8 +61,6 @@ def get_surrounding_mines(slot_to_check):
 
     slots = get_surrounding_slots(slot_to_check)
 
-    print "slot: ", slot_to_check, "    slots: ", slots
-
     # go through the surrounding slots and count the mines
     for i in slots:
         if grid[i % sizeOfGrid][i / sizeOfGrid] == 9:
@@ -186,8 +184,6 @@ def uncover(clicked_slot):
 
     # as long as there are slots to check...
     while len(new_slots_to_uncover) > 0:
-        print "uncover: ", slots_to_uncover, "    new slots: ", new_slots_to_uncover
-
         # loop through them and check each of them
         #   if they are not jet in slots_to_uncover add them
         #   if the slot is empty add all surrounding slots to the slots to check in the nex iteration
@@ -200,7 +196,6 @@ def uncover(clicked_slot):
             new_slots_to_uncover.remove(current_slot)
 
             if grid[current_slot % sizeOfGrid][current_slot / sizeOfGrid] == 0:
-                print "ading new slots..."
                 for new_slot in get_surrounding_slots(current_slot):
                     new_slots_to_uncover.add(new_slot)
 
