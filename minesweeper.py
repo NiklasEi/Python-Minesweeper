@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 
 # number of mines in the game
-numberOfMines = 20
+numberOfMines = 40
 sizeOfGrid = 20
 
 # array with information for each slot
@@ -20,13 +20,11 @@ flagged = np.zeros((sizeOfGrid, sizeOfGrid), np.dtype(bool))
 play = False
 
 
-def get_surrounding_mines(slot_to_check):
+def get_surrounding_slots(slot_to_check):
     """
-    Get the number of mines around a given slot
-    :return number of mines
+    Get surrounding slots of a given slot
+    :return list with surrounding slots
     """
-    mines = 0
-
     # check for slot at the corners of the grid
     if slot_to_check == 0:
         slots = [1, 1 + sizeOfGrid, sizeOfGrid]
@@ -50,6 +48,18 @@ def get_surrounding_mines(slot_to_check):
     # 'normal' case in the middle of the grid
     else:
         slots = [slot_to_check - sizeOfGrid - 1, slot_to_check - sizeOfGrid, slot_to_check - sizeOfGrid + 1, slot_to_check - 1, slot_to_check + 1, slot_to_check + sizeOfGrid - 1, slot_to_check + sizeOfGrid, slot_to_check + sizeOfGrid + 1]
+
+    return slots
+
+
+def get_surrounding_mines(slot_to_check):
+    """
+    Get the number of mines around a given slot
+    :return number of mines
+    """
+    mines = 0
+
+    slots = get_surrounding_slots(slot_to_check)
 
     print "slot: ", slot_to_check, "    slots: ", slots
 
@@ -162,10 +172,41 @@ def uncover(clicked_slot):
     When the player clicks an empty slot the game should
     uncover all surrounding slots up until the first warnings
     """
-    slots_to_uncover = [clicked_slot]
-    new_slots_to_uncover = []
 
-    
+    # set containing the slots that will be uncovered
+    slots_to_uncover = set()
+    slots_to_uncover.add(clicked_slot)
+
+    # set containing all slots to check in the next iteration
+    new_slots_to_uncover = set()
+
+    # add all surrounding slots to the slots to check
+    for i in get_surrounding_slots(clicked_slot):
+        new_slots_to_uncover.add(i)
+
+    # as long as there are slots to check...
+    while len(new_slots_to_uncover) > 0:
+        print "uncover: ", slots_to_uncover, "    new slots: ", new_slots_to_uncover
+
+        # loop through them and check each of them
+        #   if they are not jet in slots_to_uncover add them
+        #   if the slot is empty add all surrounding slots to the slots to check in the nex iteration
+        for current_slot in new_slots_to_uncover.copy():
+            if current_slot in slots_to_uncover:
+                new_slots_to_uncover.remove(current_slot)
+                continue
+
+            slots_to_uncover.add(current_slot)
+            new_slots_to_uncover.remove(current_slot)
+
+            if grid[current_slot % sizeOfGrid][current_slot / sizeOfGrid] == 0:
+                print "ading new slots..."
+                for new_slot in get_surrounding_slots(current_slot):
+                    new_slots_to_uncover.add(new_slot)
+
+    for to_uncover in slots_to_uncover:
+        uncovered[to_uncover % sizeOfGrid][to_uncover / sizeOfGrid] = True
+
 
 
 # open the screen for the player
@@ -216,6 +257,10 @@ while True:
 
             # uncover the slot and update the screen
             uncovered[x / 15][y / 15] = True
+
+            if grid[x / 15][y / 15] == 0:
+                uncover(x / 15 + (y / 15) * sizeOfGrid)
+
             show()
 
             # check weather the game was won
