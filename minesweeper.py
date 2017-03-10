@@ -1,6 +1,16 @@
 import pygame
 import numpy as np
 
+"""
+Classic Minesweeper game
+
+Minesweeper played on a 20x20 grid. Left-click will uncover a slot
+and right-click sets a flag. Flags prevent uncovering of the slot.
+There are 40 mines scattered randomly over the grid. The game is won
+if the 40 slots containing mines are the only covered slots left.
+If the player uncovers a bomb the game is lost.
+"""
+
 # number of mines in the game
 numberOfMines = 40
 sizeOfGrid = 20
@@ -16,14 +26,14 @@ uncovered = np.zeros((sizeOfGrid, sizeOfGrid), np.dtype(bool))
 # boolean array to save flagged/un-flagged info about every slot
 flagged = np.zeros((sizeOfGrid, sizeOfGrid), np.dtype(bool))
 
-# if this is false all events (exept quit events) are ignored
+# if this is false all events (except quit events) are ignored
 play = False
 
 
 def get_surrounding_slots(slot_to_check):
     """
     Get surrounding slots of a given slot
-    :return list with surrounding slots
+    :return list containing surrounding slots
     """
     # check for slot at the corners of the grid
     if slot_to_check == 0:
@@ -37,17 +47,23 @@ def get_surrounding_slots(slot_to_check):
 
     # check for slot at the edges of the grid
     elif slot_to_check / sizeOfGrid == 0:
-        slots = [slot_to_check - 1, slot_to_check + 1, slot_to_check + sizeOfGrid - 1, slot_to_check + sizeOfGrid, slot_to_check + sizeOfGrid + 1]
+        slots = [slot_to_check - 1, slot_to_check + 1, slot_to_check + sizeOfGrid - 1, slot_to_check + sizeOfGrid,
+                 slot_to_check + sizeOfGrid + 1]
     elif slot_to_check / sizeOfGrid == sizeOfGrid - 1:
-        slots = [slot_to_check - 1, slot_to_check + 1, slot_to_check - sizeOfGrid + 1, slot_to_check - sizeOfGrid, slot_to_check - sizeOfGrid - 1]
+        slots = [slot_to_check - 1, slot_to_check + 1, slot_to_check - sizeOfGrid + 1, slot_to_check - sizeOfGrid,
+                 slot_to_check - sizeOfGrid - 1]
     elif slot_to_check % sizeOfGrid == 0:
-        slots = [slot_to_check - sizeOfGrid, slot_to_check + sizeOfGrid, slot_to_check - sizeOfGrid + 1, slot_to_check + 1, slot_to_check + sizeOfGrid + 1]
+        slots = [slot_to_check - sizeOfGrid, slot_to_check + sizeOfGrid, slot_to_check - sizeOfGrid + 1,
+                 slot_to_check + 1, slot_to_check + sizeOfGrid + 1]
     elif slot_to_check % sizeOfGrid == sizeOfGrid - 1:
-        slots = [slot_to_check - 1, slot_to_check - sizeOfGrid - 1, slot_to_check - sizeOfGrid, slot_to_check + sizeOfGrid - 1, slot_to_check + sizeOfGrid]
+        slots = [slot_to_check - 1, slot_to_check - sizeOfGrid - 1, slot_to_check - sizeOfGrid,
+                 slot_to_check + sizeOfGrid - 1, slot_to_check + sizeOfGrid]
 
     # 'normal' case in the middle of the grid
     else:
-        slots = [slot_to_check - sizeOfGrid - 1, slot_to_check - sizeOfGrid, slot_to_check - sizeOfGrid + 1, slot_to_check - 1, slot_to_check + 1, slot_to_check + sizeOfGrid - 1, slot_to_check + sizeOfGrid, slot_to_check + sizeOfGrid + 1]
+        slots = [slot_to_check - sizeOfGrid - 1, slot_to_check - sizeOfGrid, slot_to_check - sizeOfGrid + 1,
+                 slot_to_check - 1, slot_to_check + 1, slot_to_check + sizeOfGrid - 1, slot_to_check + sizeOfGrid,
+                 slot_to_check + sizeOfGrid + 1]
 
     return slots
 
@@ -86,10 +102,10 @@ for i in range(sizeOfGrid**2):
 
 # initialize pygame
 pygame.init()
-# set the display size (our pictures are 15*15 so 150*150 will result in a 10*10 grid)
+# set the display size (our pictures are 15*15)
 screen = pygame.display.set_mode((15 * sizeOfGrid, 15 * sizeOfGrid))
 # set the display caption
-pygame.display.set_caption("minesweeper")
+pygame.display.set_caption("Minesweeper")
 
 # load all images
 cover = pygame.image.load("pics/10.png")
@@ -156,19 +172,22 @@ def won():
 
     :return game is won
     """
-    slots = 0
+    slots_left = 0
     for column in range(sizeOfGrid):
         for row in range(sizeOfGrid):
             if not uncovered[column][row]:
-                slots += 1
+                slots_left += 1
 
-    return slots == numberOfMines
+    return slots_left == numberOfMines
 
 
 def uncover(clicked_slot):
     """
-    When the player clicks an empty slot the game should
-    uncover all surrounding slots up until the first warnings
+    Uncover all slots around a click up to the first warning
+
+    When the player clicks an empty slot the game will
+    uncover all surrounding slots up until the first warnings.
+    show() has to be called to display the changes afterwards.
     """
 
     # set containing the slots that will be uncovered
@@ -186,7 +205,6 @@ def uncover(clicked_slot):
     while len(new_slots_to_uncover) > 0:
         # loop through them and check each of them
         #   if they are not jet in slots_to_uncover add them
-        #   if the slot is empty add all surrounding slots to the slots to check in the nex iteration
         for current_slot in new_slots_to_uncover.copy():
             if current_slot in slots_to_uncover:
                 new_slots_to_uncover.remove(current_slot)
@@ -195,13 +213,13 @@ def uncover(clicked_slot):
             slots_to_uncover.add(current_slot)
             new_slots_to_uncover.remove(current_slot)
 
+            # if the slot is empty add all surrounding slots to the slots to check in the nex iteration
             if grid[current_slot % sizeOfGrid][current_slot / sizeOfGrid] == 0:
                 for new_slot in get_surrounding_slots(current_slot):
                     new_slots_to_uncover.add(new_slot)
 
     for to_uncover in slots_to_uncover:
         uncovered[to_uncover % sizeOfGrid][to_uncover / sizeOfGrid] = True
-
 
 
 # open the screen for the player
