@@ -5,7 +5,7 @@ import numpy as np
 Classic Minesweeper game
 
 Minesweeper played on a 20x20 grid. Left-click will uncover a slot
-and right-click sets a flag. Flags prevent uncovering of the slot.
+and right-click sets or removes a flag. Flags prevent uncovering of the slot.
 There are 40 mines scattered randomly over the grid. The game is won
 if the 40 slots containing mines are the only covered slots left.
 If the player uncovers a bomb the game is lost.
