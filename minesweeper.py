@@ -13,6 +13,7 @@ If the player uncovers a bomb the game is lost.
 
 # number of mines in the game
 numberOfMines = 40
+numberOfFlags = 0
 sizeOfGrid = 20
 
 # array with information for each slot
@@ -104,8 +105,6 @@ for i in range(sizeOfGrid**2):
 pygame.init()
 # set the display size (our pictures are 15*15)
 screen = pygame.display.set_mode((15 * sizeOfGrid, 15 * sizeOfGrid))
-# set the display caption
-pygame.display.set_caption("Minesweeper")
 
 # load all images
 cover = pygame.image.load("pics/10.png")
@@ -161,6 +160,9 @@ def show():
             else:
                 screen.blit(cover, (x, y))
                 continue
+
+    # update flags/mine info
+    pygame.display.set_caption("Minesweeper    " + str(numberOfFlags) + "/" + str(numberOfMines))
 
     # update the players screen
     pygame.display.flip()
@@ -258,7 +260,6 @@ while True:
             # if the slot is a bomb the game is lost
             if grid[x / 15][y / 15] == 9:
                 print "you clicked on a mine! You lost the game"
-                pygame.display.set_caption("lost")
 
                 # stop accepting events
                 play = False
@@ -266,6 +267,7 @@ while True:
                 # uncover the slot and update the screen
                 uncovered[x / 15][y / 15] = True
                 show()
+                pygame.display.set_caption("Minesweeper    " + str(numberOfFlags) + "/" + str(numberOfMines) + "   Lost!")
                 break
 
             # uncover the slot and update the screen
@@ -279,7 +281,7 @@ while True:
             # check weather the game was won
             if won():
                 print "you won the game"
-                pygame.display.set_caption("won")
+                pygame.display.set_caption("Minesweeper    " + str(numberOfFlags) + "/" + str(numberOfMines) + "   Won!")
                 play = False
 
         # right click
@@ -295,9 +297,11 @@ while True:
             # remove an existing flag
             if flagged[x / 15][y / 15]:
                 flagged[x / 15][y / 15] = False
+                numberOfFlags -= 1
                 show()
                 break
 
             # place a flag and update the screen
             flagged[x / 15][y / 15] = True
+            numberOfFlags += 1
             show()
