@@ -1,5 +1,7 @@
 import pygame
 import numpy as np
+import sys
+
 
 """
 Classic Minesweeper game
@@ -11,10 +13,22 @@ if the 40 slots containing mines are the only covered slots left.
 If the player uncovers a bomb the game is lost.
 """
 
-# number of mines in the game
+# default number of mines in the game
 numberOfMines = 40
+
 numberOfFlags = 0
+
+# default grid size
 sizeOfGrid = 20
+
+if len(sys.argv) > 1:
+    if len(sys.argv) == 3:
+        numberOfMines = int(sys.argv[2])
+        sizeOfGrid = int(sys.argv[1])
+    else:
+        print "start without any arguments or with two integers:"
+        print "    python minesweeper.py <grid size> <number of mines>"
+        sys.exit()
 
 # array with information for each slot
 #   any number from 0 to 8 is a warning
