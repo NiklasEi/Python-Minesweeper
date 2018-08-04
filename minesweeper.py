@@ -26,8 +26,8 @@ if len(sys.argv) > 1:
         numberOfMines = int(sys.argv[2])
         sizeOfGrid = int(sys.argv[1])
     else:
-        print "start without any arguments or with two integers:"
-        print "    python minesweeper.py <grid size> <number of mines>"
+        print("start without any arguments or with two integers:")
+        print("    python minesweeper.py <grid size> <number of mines>")
         sys.exit()
 
 # array with information for each slot
@@ -61,10 +61,10 @@ def get_surrounding_slots(slot_to_check):
         slots = [slot_to_check - 1, slot_to_check - sizeOfGrid, slot_to_check - sizeOfGrid - 1]
 
     # check for slot at the edges of the grid
-    elif slot_to_check / sizeOfGrid == 0:
+    elif slot_to_check//sizeOfGrid == 0:
         slots = [slot_to_check - 1, slot_to_check + 1, slot_to_check + sizeOfGrid - 1, slot_to_check + sizeOfGrid,
                  slot_to_check + sizeOfGrid + 1]
-    elif slot_to_check / sizeOfGrid == sizeOfGrid - 1:
+    elif slot_to_check//sizeOfGrid == sizeOfGrid - 1:
         slots = [slot_to_check - 1, slot_to_check + 1, slot_to_check - sizeOfGrid + 1, slot_to_check - sizeOfGrid,
                  slot_to_check - sizeOfGrid - 1]
     elif slot_to_check % sizeOfGrid == 0:
@@ -94,31 +94,31 @@ def get_surrounding_mines(slot_to_check):
 
     # go through the surrounding slots and count the mines
     for i in slots:
-        if grid[i % sizeOfGrid][i / sizeOfGrid] == 9:
+        if grid[i % sizeOfGrid][i//sizeOfGrid] == 9:
             mines += 1
     return mines
 
 
 # randomly distribute the mines
 for i in range(numberOfMines):
-    slot = np.random.random_integers(0, sizeOfGrid**2 - 1)
+    slot = np.random.randint(sizeOfGrid**2)
 
     # get a new slot as long as there is already a mine at the current one
-    while grid[slot % sizeOfGrid][slot / sizeOfGrid] == 9:
-        slot = np.random.random_integers(0, sizeOfGrid**2 - 1)
+    while grid[slot % sizeOfGrid][slot//sizeOfGrid] == 9:
+        slot = np.random.randint(sizeOfGrid**2)
 
     # place the mine
-    grid[slot % sizeOfGrid][slot / sizeOfGrid] = 9
+    grid[slot % sizeOfGrid][slot//sizeOfGrid] = 9
 
 # calculate and save the number of surrounding mines for all slots
 for i in range(sizeOfGrid**2):
-    if grid[i % sizeOfGrid][i / sizeOfGrid] != 9:
-        grid[i % sizeOfGrid][i / sizeOfGrid] = get_surrounding_mines(i)
+    if grid[i % sizeOfGrid][i//sizeOfGrid] != 9:
+        grid[i % sizeOfGrid][i//sizeOfGrid] = get_surrounding_mines(i)
 
 # initialize pygame
 pygame.init()
 # set the display size (our pictures are 15*15)
-screen = pygame.display.set_mode((15 * sizeOfGrid, 15 * sizeOfGrid))
+screen = pygame.display.set_mode((15 * sizeOfGrid, 15 * sizeOfGrid), pygame.RESIZABLE)
 
 # load all images
 cover = pygame.image.load("pics/10.png")
@@ -134,6 +134,8 @@ warning8 = pygame.image.load("pics/8.png")
 mine = pygame.image.load("pics/9.png")
 flag = pygame.image.load("pics/11.png")
 
+pygame.display.set_icon(pygame.image.load("pics/mine.png"))
+
 # save the pictures in a map for easier access
 pics = {0: warning0,
         1: warning1,
@@ -144,8 +146,7 @@ pics = {0: warning0,
         6: warning6,
         7: warning7,
         8: warning8,
-        9: mine
-        }
+        9: mine}
 
 
 def show():
@@ -193,7 +194,7 @@ def won():
         for row in range(sizeOfGrid):
             if not uncovered[column][row]:
                 slots_left += 1
-
+    print("won is: " + str(slots_left == numberOfMines))
     return slots_left == numberOfMines
 
 
@@ -230,12 +231,12 @@ def uncover(clicked_slot):
             new_slots_to_uncover.remove(current_slot)
 
             # if the slot is empty add all surrounding slots to the slots to check in the nex iteration
-            if grid[current_slot % sizeOfGrid][current_slot / sizeOfGrid] == 0:
+            if grid[current_slot % sizeOfGrid][current_slot//sizeOfGrid] == 0:
                 for new_slot in get_surrounding_slots(current_slot):
                     new_slots_to_uncover.add(new_slot)
 
     for to_uncover in slots_to_uncover:
-        uncovered[to_uncover % sizeOfGrid][to_uncover / sizeOfGrid] = True
+        uncovered[to_uncover % sizeOfGrid][to_uncover//sizeOfGrid] = True
 
 
 # open the screen for the player
@@ -266,36 +267,36 @@ while True:
             y = pygame.mouse.get_pos()[1]
 
             # do nothing if the slot is already uncovered or flaged
-            if uncovered[x / 15][y / 15]:
+            if uncovered[x//15][y//15]:
                 break
-            elif flagged[x / 15][y / 15]:
+            elif flagged[x//15][y//15]:
                 break
 
             # if the slot is a bomb the game is lost
-            if grid[x / 15][y / 15] == 9:
-                print "you clicked on a mine! You lost the game"
+            if grid[x//15][y//15] == 9:
+                print("you clicked on a mine! You lost the game")
 
                 # stop accepting events
                 play = False
 
                 # uncover the slot and update the screen
-                uncovered[x / 15][y / 15] = True
+                uncovered[x//15][y//15] = True
                 show()
                 pygame.display.set_caption("Minesweeper    " + str(numberOfFlags) + "/" + str(numberOfMines) + "   Lost!")
                 break
 
             # uncover the slot and update the screen
-            uncovered[x / 15][y / 15] = True
+            uncovered[x//15][y//15] = True
 
-            if grid[x / 15][y / 15] == 0:
-                uncover(x / 15 + (y / 15) * sizeOfGrid)
+            if grid[x//15][y//15] == 0:
+                uncover(x//15 + (y//15) * sizeOfGrid)
 
             show()
 
             # check weather the game was won
             if won():
-                print "you won the game"
-                pygame.display.set_caption("Minesweeper    " + str(numberOfFlags) + "/" + str(numberOfMines) + "   Won!")
+                print("you won the game")
+                pygame.display.set_caption("Minesweeper    " + str(numberOfMines) + "/" + str(numberOfMines) + "   Won!")
                 play = False
 
         # right click
@@ -305,17 +306,17 @@ while True:
             x = pygame.mouse.get_pos()[0]
             y = pygame.mouse.get_pos()[1]
             # do nothing if the slot is uncovered
-            if uncovered[x / 15][y / 15]:
+            if uncovered[x//15][y//15]:
                 break
 
             # remove an existing flag
-            if flagged[x / 15][y / 15]:
-                flagged[x / 15][y / 15] = False
+            if flagged[x//15][y//15]:
+                flagged[x//15][y//15] = False
                 numberOfFlags -= 1
                 show()
                 break
 
             # place a flag and update the screen
-            flagged[x / 15][y / 15] = True
+            flagged[x//15][y//15] = True
             numberOfFlags += 1
             show()
